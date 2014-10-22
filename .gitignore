@@ -15,8 +15,10 @@ x64/
 x86/
 build/
 bld/
-[Bb]in/
-[Oo]bj/
+bin/
+Bin/
+obj/
+Obj/
 
 # Roslyn cache directories
 *.ide/
