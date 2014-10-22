@@ -1,0 +1,9 @@
+C:\mateev\Frogs\Frogs\bin\Debug\Frogs.exe
+C:\mateev\Frogs\Frogs\bin\Debug\Frogs.pdb
+C:\mateev\Frogs\Frogs\obj\x86\Debug\Frogs.exe
+C:\mateev\Frogs\Frogs\obj\x86\Debug\Frogs.pdb
+C:\Users\Georgi\Dropbox\SU\AI\Frogs\Frogs\obj\x86\Debug\Frogs.exe
+C:\Users\Georgi\Dropbox\SU\AI\Frogs\Frogs\obj\x86\Debug\Frogs.pdb
+C:\Users\Georgi\Dropbox\SU\AI\Frogs\Frogs\bin\Debug\Frogs.exe
+C:\Users\Georgi\Dropbox\SU\AI\Frogs\Frogs\bin\Debug\Frogs.pdb
+C:\Users\Georgi\Dropbox\SU\AI\Frogs\Frogs\obj\x86\Debug\Frogs.csprojResolveAssemblyReference.cache
