@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -19,17 +20,7 @@ namespace Numbers
 
             var finalNode = AStar(input);
             Console.WriteLine("The path is: ", finalNode.Path);
-
-            var l = finalNode.State.GetLength(0);
-            var state = finalNode.State;
-            for (int y = 0; y < l; y++)
-            {
-                for (int x = 0; x < l; x++)
-                {
-                    Console.Write(state[y, x] + " ");
-                }
-                Console.WriteLine();
-            }
+            Console.WriteLine(finalNode.ToString());            
         }
 
         static Node AStar(int[,] startState)
@@ -213,6 +204,7 @@ namespace Numbers
         {
             public int Path { get; set; }
             public int Heuristics { get; set; }
+
             public int[,] State { get; set; }
 
             public Point ZeroIndex { get; set; }
@@ -236,6 +228,25 @@ namespace Numbers
             {
                 this.State = state;
                 this.ZeroIndex = zeroIndex;
+            }
+
+            public override string ToString()
+            {
+                var state = this.State;
+                var l = state.GetLength(0);
+
+                var sb = new StringBuilder();
+
+                for (int y = 0; y < l; y++)
+                {
+                    for (int x = 0; x < l; x++)
+                    {
+                        sb.Append(state[y, x] + " ");
+                    }
+                    sb.AppendLine();
+                }
+
+                return sb.ToString();
             }
         }
 
