@@ -9,9 +9,28 @@ namespace Queens
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Enter number of queens: ");
+            var n = int.Parse(Console.ReadLine());
+            var queens = Place(n);
+
+            var board = new int[n, n];
+
+            foreach (var q in queens)
+            {
+                board[q.Y, q.X] = 1;
+            }
+
+            for (int y = 0; y < n; y++)
+            {
+                for (int x = 0; x < n; x++)
+                {
+                    Console.Write(board[y, x] + ", ");
+                }
+                Console.WriteLine();
+            }
         }
 
-        private static void Place(int n)
+        private static Queen[] Place(int n)
         {
             // Contains the number of conflicts on every place of the board.
             var conflictsBoard = new int[n, n];
@@ -33,10 +52,22 @@ namespace Queens
                 PlaceOnMinimumConflicts(queen, conflictsBoard);
             } 
             while (conflicting.Count != 0);
+
+            return queensCoordinates;
         }
 
         private static void UpdateConflictsBoard(int[,] conflictsBoard, Queen[] queens)
         {
+            // Clean the board first
+            var l = conflictsBoard.GetLength(0);
+            for (int y = 0; y < l; y++)
+            {
+                for (int x = 0; x < l; x++)
+                {
+                    conflictsBoard[y, x] = 0;
+                }
+            }
+
             for (var i = 0; i < queens.Length; i++)
             {
                 var queen = queens[i];
@@ -68,7 +99,7 @@ namespace Queens
         private static Queen ChooseRandom(IList<Queen> conflicting)
         {
             var r = new Random();
-            var index = r.Next(conflicting.Count - 1);
+            var index = r.Next(conflicting.Count);
             return conflicting[index];
         }
 
@@ -90,13 +121,31 @@ namespace Queens
         {
             var l = conflictsBoard.GetLength(0);
 
-            // Mark that there is queen on this place. No other place can have such number of conflicts.
-            conflictsBoard[queen.Y, queen.X] = l;
-
-            var boundaryIndex = l - 1;
-            for (int ofset = 0; ofset < l; ofset++)
+            for (int ofset = 1; ofset < l; ofset++)
             {
+                // horizontal
+                UpdateField(queen.X + ofset, queen.Y, conflictsBoard);
+                UpdateField(queen.X - ofset, queen.Y, conflictsBoard);
 
+                // left diagonal
+                UpdateField(queen.X - ofset, queen.Y - ofset, conflictsBoard);
+                UpdateField(queen.X + ofset, queen.Y + ofset, conflictsBoard);
+
+                // right diagonal
+                UpdateField(queen.X + ofset, queen.Y - ofset, conflictsBoard);
+                UpdateField(queen.X - ofset, queen.Y + ofset, conflictsBoard);
+            }
+        }
+
+        private static void UpdateField(int x, int y, int[,] board)
+        {
+            var l = board.GetLength(0);
+            var boundaryIndex = l - 1;
+
+            if (x >= 0 && y >= 0 &&
+                x <= boundaryIndex && y <= boundaryIndex)
+            {
+                board[y, x] += 1;
             }
         }
 
@@ -107,8 +156,8 @@ namespace Queens
             var l = queens.Length;
             for (int column = 0; column < l; column++)
             {
-                var row = r.Next(l - 1);
-                var q = new Queen(row, column);
+                var row = r.Next(l);
+                var q = new Queen(column, row);
 
                 queens[column] = q;
             }
