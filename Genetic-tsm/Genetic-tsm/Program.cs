@@ -22,8 +22,10 @@ namespace Genetic_tsm
 
             for (int i = 0; i < epochs; i++)
             {                
-                var selected = CrossOver(population);
-                Mutate(selected);                
+                var crossed = CrossOver(population);
+                var mutated = Mutate(crossed);
+
+                population.AddRange(mutated);
 
                 Evolution(population, populationSize);
             }
@@ -36,7 +38,16 @@ namespace Genetic_tsm
         /// <param name="populationSize"></param>
         private static void Evolution(IList<Point[]> population, int populationSize)
         {
-            
+            var sortedPopulation = new SortedDictionary<int, Point[]>();
+            for (int i = 0; i < population.Count; i++)
+            {
+                sortedPopulation.Add(
+                    Fitness(population[i]),
+                    population);
+            }
+
+            var survived = population.Reverse().Take(populationSize);
+            return survived;
         }
 
         /// <summary>
@@ -56,15 +67,62 @@ namespace Genetic_tsm
         /// <returns></returns>
         private static IList<Point[]> CrossOver(IList<Point[]> population)
         {
-            throw new NotImplementedException();
+            var cross = new List<Point>();
+            var r = new Random();
+            for (int i = 0; i < population.Count; i++)
+            {
+                var index = r.Next(population.Count);
+                cross.Add(population[index]);
+            }
         }
 
-        private static void Mutate(IList<Point[]> selected)
+        private static IList<Point[]> Mutate(IList<Point[]> crossed)
         {
-            throw new NotImplementedException();
+            var mutated = new List<Point[]>();
+            var r = new Random();
+            for (int i = 0; i < crossed.Count / 2; i++)
+            {
+                var mPath = crossed[i];
+                var fPath = crossed[i + 1];
+                
+                var pivot = r.Next(mPath.Count);
+
+                var sorted = new SortedDictionary<int, Point>;
+                for (int e = pivot; e < mPath.Count; e++)
+                {
+                    var element = mPath[e];
+                    var elementIndex = FindIndex(fPath, element);
+                    sorted.Add(elementIndex, element);
+                }
+
+                var mutatedPath = new List<Point>();
+                for (int firstPartIndex = 0; firstPartIndex < pivot; firstPartIndex++)
+			    {
+			        mutatedPath.Add(mPath[firstPartIndex]);
+			    }
+
+                mutatedPath.AddRange(sorted.Values.ToList());
+
+                mutated.Add(mutatedPath);
+            }
+
+            return mutated;
         }
 
-        private static IList<Point[]> GeneratePopulation(Point[] points, int populationSize)
+        private static int FindIndex(Point[] population, Point element)
+        {
+            for (int i = 0; i < population.Length; i++)
+            {
+                if (population[i].Id = element.Id)
+                {
+                    return i;
+                }
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        private static List<Point[]> GeneratePopulation(Point[] points, int populationSize)
         {
             throw new NotImplementedException();
         }
@@ -76,15 +134,17 @@ namespace Genetic_tsm
 
         public struct Point
         {
-            public Point (int x, int y) 
+            public Point (int x, int y, int id) 
                 : this()
 	        {
                 this.X = x;
                 this.Y = y;
+                this.Id = id;
         	}
 
             public int X { get; set; }
             public int Y { get; set; }
+            public int Id { get; set; }
         }
     }
 }
