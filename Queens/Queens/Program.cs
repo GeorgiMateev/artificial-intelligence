@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -24,7 +25,14 @@ namespace Queens
             {
                 for (int x = 0; x < n; x++)
                 {
-                    Console.Write(board[y, x] + ", ");
+                    if (board[y, x] == 1)
+                    {
+                        Console.Write("X ");
+                    }
+                    else
+                    {
+                        Console.Write("_ ");
+                    }
                 }
                 Console.WriteLine();
             }
@@ -41,17 +49,20 @@ namespace Queens
             PlaceRandom(queensCoordinates);
 
             IList<Queen> conflicting;
-            do
+
+            while(true)
             {
                 UpdateConflictsBoard(conflictsBoard, queensCoordinates);
 
                 conflicting = FindConflicting(queensCoordinates, conflictsBoard);
 
+                if (conflicting.Count == 0) 
+                    break;
+
                 var queen = ChooseRandom(conflicting);
 
                 PlaceOnMinimumConflicts(queen, conflictsBoard);
-            } 
-            while (conflicting.Count != 0);
+            }
 
             return queensCoordinates;
         }
@@ -89,6 +100,11 @@ namespace Queens
                 if (conflicts < min)
                 {
                     min = conflicts;
+                    minIndex = row;
+                }
+                else if(conflicts == min && row != queen.Y)
+                {
+                    // Move the queen if she is already in a place with min conflicts to avoid her staying there forever.
                     minIndex = row;
                 }
             }
@@ -163,10 +179,10 @@ namespace Queens
             }
         }
 
-        struct Queen
+        [DebuggerDisplay("X: {X}, Y: {Y}")]
+        class Queen
         {
             public Queen(int x, int y)
-                :this()
             {
                 this.X = x;
                 this.Y = y;
