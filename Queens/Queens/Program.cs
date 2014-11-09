@@ -48,12 +48,12 @@ namespace Queens
 
             PlaceRandom(queensCoordinates);
 
+            UpdateConflictsBoard(conflictsBoard, queensCoordinates);
+
             IList<Queen> conflicting;
 
             while(true)
             {
-                UpdateConflictsBoard(conflictsBoard, queensCoordinates);
-
                 conflicting = FindConflicting(queensCoordinates, conflictsBoard);
 
                 if (conflicting.Count == 0) 
@@ -69,21 +69,11 @@ namespace Queens
 
         private static void UpdateConflictsBoard(int[,] conflictsBoard, Queen[] queens)
         {
-            // Clean the board first
-            var l = conflictsBoard.GetLength(0);
-            for (int y = 0; y < l; y++)
-            {
-                for (int x = 0; x < l; x++)
-                {
-                    conflictsBoard[y, x] = 0;
-                }
-            }
-
             for (var i = 0; i < queens.Length; i++)
             {
                 var queen = queens[i];
 
-                TraverseBoard(queen, conflictsBoard);
+                TraverseBoard(queen, conflictsBoard, true);
             }
         }
 
@@ -109,7 +99,14 @@ namespace Queens
                 }
             }
 
+            // Remove all conflicts caused by this queen
+            TraverseBoard(queen, conflictingBoard, false);
+
+            // Update queen
             queen.Y = minIndex;
+
+            // Update the board with the new conflicts
+            TraverseBoard(queen, conflictingBoard, true);
         }
 
         private static Queen ChooseRandom(IList<Queen> conflicting)
@@ -133,27 +130,27 @@ namespace Queens
             return conflicts;
         }
 
-        private static void TraverseBoard(Queen queen, int[,] conflictsBoard)
+        private static void TraverseBoard(Queen queen, int[,] conflictsBoard, bool increaseConflict)
         {
             var l = conflictsBoard.GetLength(0);
 
             for (int ofset = 1; ofset < l; ofset++)
             {
                 // horizontal
-                UpdateField(queen.X + ofset, queen.Y, conflictsBoard);
-                UpdateField(queen.X - ofset, queen.Y, conflictsBoard);
+                UpdateField(queen.X + ofset, queen.Y, conflictsBoard, increaseConflict);
+                UpdateField(queen.X - ofset, queen.Y, conflictsBoard, increaseConflict);
 
                 // left diagonal
-                UpdateField(queen.X - ofset, queen.Y - ofset, conflictsBoard);
-                UpdateField(queen.X + ofset, queen.Y + ofset, conflictsBoard);
+                UpdateField(queen.X - ofset, queen.Y - ofset, conflictsBoard, increaseConflict);
+                UpdateField(queen.X + ofset, queen.Y + ofset, conflictsBoard, increaseConflict);
 
                 // right diagonal
-                UpdateField(queen.X + ofset, queen.Y - ofset, conflictsBoard);
-                UpdateField(queen.X - ofset, queen.Y + ofset, conflictsBoard);
+                UpdateField(queen.X + ofset, queen.Y - ofset, conflictsBoard, increaseConflict);
+                UpdateField(queen.X - ofset, queen.Y + ofset, conflictsBoard, increaseConflict);
             }
         }
 
-        private static void UpdateField(int x, int y, int[,] board)
+        private static void UpdateField(int x, int y, int[,] board, bool increaseConfict)
         {
             var l = board.GetLength(0);
             var boundaryIndex = l - 1;
@@ -161,7 +158,14 @@ namespace Queens
             if (x >= 0 && y >= 0 &&
                 x <= boundaryIndex && y <= boundaryIndex)
             {
-                board[y, x] += 1;
+                if (increaseConfict)
+                {
+                    board[y, x] += 1;    
+                }
+                else
+                {
+                    board[y, x] -= 1;
+                }
             }
         }
 
