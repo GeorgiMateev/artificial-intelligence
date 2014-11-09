@@ -19,7 +19,7 @@ namespace Numbers
             };
 
             var finalNode = AStar(input);
-            Console.WriteLine("The path is: ", finalNode.Path);
+            Console.WriteLine("The path is: {0}", finalNode.Path);
             Console.WriteLine(finalNode.ToString());            
         }
 
@@ -30,7 +30,7 @@ namespace Numbers
 
             var startHeuristics = Heuristics(startState);
 
-            var startNode = new Node(1, startHeuristics, startState);
+            var startNode = new Node(0, startHeuristics, startState);
             startNode.ZeroIndex = FindZeroCoordinates(startState);
 
             q.Add(startHeuristics + 1, startNode);
@@ -159,9 +159,20 @@ namespace Numbers
                 coordinates[currentNumber] = c;
                 return c;
             }
-
-            var y = currentNumber / dimensionLength - 1;
-            var x = currentNumber % dimensionLength - 1;
+ 
+            var mod = currentNumber % dimensionLength;
+            int x;
+            int y;
+            if (mod == 0)
+            {
+                x = dimensionLength - 1;
+                y = currentNumber / dimensionLength - 1;
+            }
+            else
+            {
+                x = mod - 1;
+                y = currentNumber / dimensionLength;
+            }
 
             c = new Point(x, y);
             coordinates[currentNumber] = c;
@@ -183,15 +194,15 @@ namespace Numbers
                 }
             }
 
-            return new Point();
+            throw new InvalidOperationException("The state should have zero.");
         }
         
         private static IDictionary<int, Point> coordinates = new Dictionary<int, Point>();
 
-        struct Point 
+        [DebuggerDisplay("X: {X}, Y: {Y}")]
+        class Point 
         {
             public Point(int x, int y)
-                : this()
             {
                 this.X = x;
                 this.Y = y;
@@ -200,7 +211,8 @@ namespace Numbers
             public int Y { get; set; }
         }
 
-        struct Node
+        [DebuggerDisplay("Path: {Path}, Heur: {Heuristics}")]
+        class Node
         {
             public int Path { get; set; }
             public int Heuristics { get; set; }
@@ -210,7 +222,6 @@ namespace Numbers
             public Point ZeroIndex { get; set; }
 
             public Node(int path, int heuristics, int[,] state)
-                : this()
             {
                 this.Path = path;
                 this.Heuristics = heuristics;
@@ -218,13 +229,11 @@ namespace Numbers
             }
 
             public Node(int[,] state)
-                : this()
             {
                 this.State = state;
             }
 
             public Node(int[,] state, Point zeroIndex)
-                : this()
             {
                 this.State = state;
                 this.ZeroIndex = zeroIndex;
