@@ -21,17 +21,21 @@ namespace Genetic_tsm
             Console.WriteLine("Epochs:");
             var epochs = int.Parse(Console.ReadLine());
 
-            Genetic(points, population, epochs);
+            Console.WriteLine("Mutation rate:");
+            var mutationRate = int.Parse(Console.ReadLine());
+
+            Genetic(points, population, epochs, mutationRate);
         }        
 
-        private static void Genetic(Point[] points, int populationSize, int epochs)
+        private static void Genetic(Point[] points, int populationSize, int epochs, int mutationRate)
         {
             var population = GeneratePopulation(points, populationSize);
 
             for (int i = 0; i < epochs; i++)
             {                
                 var crossed = CrossOver(population);
-                var mutated = Mutate(crossed);
+
+                var mutated = Mutate(crossed, mutationRate);
 
                 population.AddRange(mutated);
 
@@ -49,6 +53,27 @@ namespace Genetic_tsm
                     Console.WriteLine("On {0} epoch the shortest path length is: {1}", i + 1, length);
                 }
             }
+        }
+
+        private static IList<Point[]> Mutate(IList<Point[]> crossed, int mutationRate)
+        {
+            var r = new Random();
+            for (int i = 0; i < crossed.Count; i++)
+            {
+                if (r.Next(1, 101) <= mutationRate)
+                {
+                    // Reverse two random positions in the array
+                    var path = crossed[i];
+                    var firstIndex = r.Next(path.Length);
+                    var secondIndex = r.Next(path.Length);
+
+                    var firstIndexCopy = path[firstIndex];
+                    path[firstIndex] = path[secondIndex];
+                    path[secondIndex] = firstIndexCopy;
+                }                
+            }
+
+            return crossed;
         }
 
         /// <summary>
@@ -98,33 +123,18 @@ namespace Genetic_tsm
             return Math.Sqrt(Math.Pow(xDelta, 2) + Math.Pow(yDelta, 2));
         }
 
-        /// <summary>
-        /// Group by two.
-        /// </summary>
-        /// <param name="population"></param>
-        /// <returns></returns>
         private static IList<Point[]> CrossOver(IList<Point[]> population)
         {
-            var cross = new List<Point[]>();
-            var r = new Random();
-            for (int i = 0; i < population.Count; i++)
-            {
-                var index = r.Next(population.Count);
-                cross.Add(population[index]);
-            }
+            var randomListTool = new RandomListTool<Point[]>();
+            var shuffled = randomListTool.ShuffleList(population);
 
-            return cross;
-        }
-
-        private static IList<Point[]> Mutate(IList<Point[]> crossed)
-        {
-            var mutated = new List<Point[]>();
+            var crossed = new List<Point[]>();
             var r = new Random();
-            for (int i = 0; i < crossed.Count / 2; i++)
+            for (int i = 0; i < shuffled.Count / 2; i++)
             {
-                var mPath = crossed[i];
-                var fPath = crossed[i + 1];
-                
+                var mPath = shuffled[i];
+                var fPath = shuffled[i + 1];
+
                 var pivot = r.Next(mPath.Length);
 
                 var sorted = new SortedDictionary<int, Point>();
@@ -135,18 +145,18 @@ namespace Genetic_tsm
                     sorted.Add(elementIndex, element);
                 }
 
-                var mutatedPath = new List<Point>();
+                var crossedPath = new List<Point>();
                 for (int firstPartIndex = 0; firstPartIndex < pivot; firstPartIndex++)
-			    {
-			        mutatedPath.Add(mPath[firstPartIndex]);
-			    }
+                {
+                    crossedPath.Add(mPath[firstPartIndex]);
+                }
 
-                mutatedPath.AddRange(sorted.Values.ToList());
+                crossedPath.AddRange(sorted.Values.ToList());
 
-                mutated.Add(mutatedPath.ToArray());
+                crossed.Add(crossedPath.ToArray());
             }
 
-            return mutated;
+            return crossed;
         }
 
         private static int FindIndex(Point[] population, Point element)
@@ -165,10 +175,11 @@ namespace Genetic_tsm
         private static List<Point[]> GeneratePopulation(Point[] points, int populationSize)
         {
             var population = new List<Point[]>();
+            var randomListTool = new RandomListTool<Point>();
 
             for (int i = 0; i < populationSize; i++)
             {
-                population.Add(RandomArrayTool.RandomizeArray(points));
+                population.Add(randomListTool.ShuffleList(points).ToArray());
             }
 
             return population;
@@ -177,7 +188,7 @@ namespace Genetic_tsm
         private static Point[] GeneratePoints(int n)
         {
             var r = new Random();
-            var maxDistance = 100;
+            var maxDistance = 1000;
             var points = new Point[n];
 
             for (int i = 0; i < n; i++)
@@ -224,34 +235,25 @@ namespace Genetic_tsm
             #endregion
         }
 
-        static class RandomArrayTool
+        public class RandomListTool<T>
         {
             static Random _random = new Random();
 
-            public static Point[] RandomizeArray(Point[] arr)
+            public  IList<T> ShuffleList(IList<T> list)
             {
-                var list = new List<KeyValuePair<int, Point>>();
-                // Add all strings from array
-                // Add new random int each time
-                foreach (var s in arr)
+                var randomMap = new List<KeyValuePair<int, T>>();
+
+                foreach (var s in list)
                 {
-                    list.Add(new KeyValuePair<int, Point>(_random.Next(), s));
+                    randomMap.Add(new KeyValuePair<int, T>(_random.Next(), s));
                 }
+
                 // Sort the list by the random number
-                var sorted = from item in list
+                var sorted = from item in randomMap
                              orderby item.Key
-                             select item;
-                // Allocate new string array
-                var result = new Point[arr.Length];
-                // Copy values to array
-                int index = 0;
-                foreach (KeyValuePair<int, Point> pair in sorted)
-                {
-                    result[index] = pair.Value;
-                    index++;
-                }
-                // Return copied array
-                return result;
+                             select item.Value;
+
+                return sorted.ToList<T>();
             }
         }
     }
