@@ -81,23 +81,32 @@ namespace Queens
         {
             var l = conflictingBoard.GetLength(0);
             var column = queen.X;
-            var minIndex = 0;
             var min = l;
+
+            var minConflicts = new Dictionary<int, List<int>>();
 
             for (int row = 0; row < l; row++)
             {
                 var conflicts = conflictingBoard[row, column];
-                if (conflicts < min)
+                if (conflicts <= min)
                 {
                     min = conflicts;
-                    minIndex = row;
-                }
-                else if(conflicts == min && row != queen.Y)
-                {
-                    // Move the queen if she is already in a place with min conflicts to avoid her staying there forever.
-                    minIndex = row;
+
+                    if(minConflicts.ContainsKey(conflicts)) 
+                    {
+                        minConflicts[conflicts].Add(row);
+                    }
+                    else 
+                    {
+                        minConflicts.Add(conflicts, new List<int> { row });
+                    }
                 }
             }
+
+            var minIndexes = minConflicts[min];
+            var r = new Random();
+            var rIndex = r.Next(minIndexes.Count);
+            var minIndex = minIndexes[rIndex];
 
             // Remove all conflicts caused by this queen
             TraverseBoard(queen, conflictingBoard, false);
