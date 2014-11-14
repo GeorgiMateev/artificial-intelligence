@@ -10,9 +10,11 @@ namespace TicTacToe
     {
         static void Main(string[] args)
         {
+            var state = new int[3, 3];
+            Max(-9, 9, state);
         }
 
-        private int Max(int alfa, int beta, int[,] state)
+        private static int? Max(int alfa, int beta, int[,] state)
         {
             int result;
             if (Evaluate(state, out result))
@@ -29,7 +31,7 @@ namespace TicTacToe
 
                 var minLimit = Min(alfa, beta, state);
 
-                if (minLimit > alfa) alfa = minLimit;
+                if (minLimit.HasValue && alfa < minLimit.Value) alfa = minLimit.Value;
 
                 if (alfa >= beta) return alfa;
 
@@ -37,10 +39,10 @@ namespace TicTacToe
                 state[move.Item1, move.Item2] = 0;
             }
 
-            return (int)Players.X;
+            return null;
         }              
 
-        private int Min(int alfa, int beta, int[,] state)
+        private static int? Min(int alfa, int beta, int[,] state)
         {
             int result;
             if (Evaluate(state, out result))
@@ -57,7 +59,7 @@ namespace TicTacToe
 
                 var maxLimit = Max(alfa, beta, state);
 
-                if (maxLimit < alfa) alfa = maxLimit;
+                if (maxLimit.HasValue && maxLimit < beta) beta = maxLimit.Value;
 
                 if (alfa >= beta) return beta;
 
@@ -65,10 +67,10 @@ namespace TicTacToe
                 state[move.Item1, move.Item2] = 0;
             }
 
-            return (int)Players.O;
+            return null;
         }
 
-        private List<Tuple<int, int>> Moves(int[,] state)
+        private static List<Tuple<int, int>> Moves(int[,] state)
         {
             var moves = new List<Tuple<int, int>>();
             var length = state.GetLength(0);
@@ -87,7 +89,7 @@ namespace TicTacToe
             return moves;
         }
 
-        private bool Evaluate(int[,] state, out int result)
+        private static bool Evaluate(int[,] state, out int result)
         {
             result = 0;
 
@@ -98,16 +100,16 @@ namespace TicTacToe
             {
                 var winningSymbol = state[row, 0];
                 var haveWinner = true;
-                for (int column = 1; column < length; column++)
+                for (int column = 0; column < length; column++)
                 {
+                    // there are empty places
+                    if (state[row, column] == 0) return false;
+
                     if (state[row, column] != winningSymbol)
                     {
                         haveWinner = false;
                         break;
-                    }
-
-                    // there are empty places
-                    if (state[row, column] == 0) return false;
+                    }                    
                 }
 
                 if (haveWinner) 
@@ -123,16 +125,16 @@ namespace TicTacToe
                 var winningSymbol = state[0, column];
                 var haveWinner = true;
 
-                for (int row = 1; row < length; row++)
+                for (int row = 0; row < length; row++)
                 {
+                    // there are empty places
+                    if (state[row, column] == 0) return false;
+
                     if (state[row, column] != winningSymbol)
                     {
                         haveWinner = false;
                         break;
-                    }
-
-                    // there are empty places
-                    if (state[row, column] == 0) return false;
+                    }                    
                 }
 
                 if (haveWinner)
@@ -143,7 +145,6 @@ namespace TicTacToe
             }
 
             // draw
-            result = 0;
             return true;
         }
 
