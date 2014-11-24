@@ -9,25 +9,31 @@ namespace Genetic_tsm
 {
     class Program
     {
+        public static Random r = new Random(133);
         static void Main(string[] args)
         {
             Console.WriteLine("Number of cities:");
-            var n = int.Parse(Console.ReadLine());
+           // var n = int.Parse(Console.ReadLine());
+            var n = 10;
+            var population = 10;
+            var epochs = 100;
+            var mutationRate = 20;
+            var surviveRate = 20;
             var points = GeneratePoints(n);
 
             Console.WriteLine("Population size:");
-            var population = int.Parse(Console.ReadLine());
+            //var population = int.Parse(Console.ReadLine());
 
             Console.WriteLine("Epochs:");
-            var epochs = int.Parse(Console.ReadLine());
+            //var epochs = int.Parse(Console.ReadLine());
 
             Console.WriteLine("Mutation rate:");
-            var mutationRate = int.Parse(Console.ReadLine());
+            //var mutationRate = int.Parse(Console.ReadLine());
 
-            Genetic(points, population, epochs, mutationRate);
+            Genetic(points, population, epochs, mutationRate, surviveRate);
         }        
 
-        private static void Genetic(Point[] points, int populationSize, int epochs, int mutationRate)
+        private static void Genetic(Point[] points, int populationSize, int epochs, int mutationRate, int surviveRate)
         {
             var population = GeneratePopulation(points, populationSize);
 
@@ -37,16 +43,14 @@ namespace Genetic_tsm
 
                 var mutated = Mutate(crossed, mutationRate);
 
-                population.AddRange(mutated);
-
-                population = Evolution(population, populationSize);
+                population = Evolution(population, mutated, populationSize, surviveRate);
 
                 // Print the length of the shortest path after the 10th, 1/4, 2/4, 3/4 and the last epoch.
                 if (i == 9 ||
                     i == Math.Floor(epochs * 1 / 4d) ||
                     i == Math.Floor(epochs * 1 / 2d) ||
                     i == Math.Floor(epochs * 3 / 4d) ||
-                    i == epochs -1)
+                    i == epochs - 1)
                 {
                     var shortestPath = population[0];
                     var length = Fitness(shortestPath);
@@ -57,7 +61,7 @@ namespace Genetic_tsm
 
         private static IList<Point[]> Mutate(IList<Point[]> crossed, int mutationRate)
         {
-            var r = new Random();
+            
             for (int i = 0; i < crossed.Count; i++)
             {
                 if (r.Next(1, 101) <= mutationRate)
@@ -79,21 +83,29 @@ namespace Genetic_tsm
         /// <summary>
         /// Return the paths with shortest length.
         /// </summary>
-        /// <param name="population"></param>
+        /// <param name="oldPopulation"></param>
         /// <param name="populationSize"></param>
-        private static List<Point[]> Evolution(IList<Point[]> population, int populationSize)
+        private static List<Point[]> Evolution(IList<Point[]> oldPopulation, IList<Point[]> mutated, int populationSize, int surviveRate)
         {
             var sortedPopulation = new SortedDictionary<double, Point[]>(new DuplicateKeyComparer<double>());
-            for (int i = 0; i < population.Count; i++)
+            for (int i = 0; i < oldPopulation.Count; i++)
             {
                 sortedPopulation.Add(
-                    Fitness(population[i]),
-                    population[i]);
+                    Fitness(oldPopulation[i]),
+                    oldPopulation[i]);
             }
 
+            var take = populationSize * surviveRate / 100d;
+
+            // Ensure that the population will keep the specified size
+            take += populationSize - mutated.Count - take;
+
+            //keep some part of the old population
             var survived = sortedPopulation.Values
-                .Take(populationSize)
+                .Take((int)Math.Floor(take))
                 .ToList();
+
+            survived.AddRange(mutated);
             return survived;
         }
 
@@ -187,7 +199,7 @@ namespace Genetic_tsm
 
         private static Point[] GeneratePoints(int n)
         {
-            var r = new Random();
+            
             var maxDistance = 1000;
             var points = new Point[n];
 
@@ -196,8 +208,12 @@ namespace Genetic_tsm
                 var x = r.Next(maxDistance);
                 var y = r.Next(maxDistance);
                 points[i] = new Point(x, y, r.Next(10000));
-            }
 
+                //Console.Write("x: {0}, y: {1};", x, y);
+                
+            }
+            //Console.WriteLine();
+            
             return points;
         }
 
@@ -237,7 +253,7 @@ namespace Genetic_tsm
 
         public class RandomListTool<T>
         {
-            static Random _random = new Random();
+            static Random _random = new Random(1);
 
             public  IList<T> ShuffleList(IList<T> list)
             {
