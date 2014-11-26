@@ -10,19 +10,36 @@ namespace TicTacToe
     {
         static void Main(string[] args)
         {
-            var state = new int[3, 3];
-            int? result;
-            do
+            if (true)
             {
-                HumanMove(state, Players.X);
-                Tuple<int, int> bestMove;
-                result = Min(int.MinValue, int.MaxValue, CopyState(state), out bestMove);
-                state[bestMove.Item1, bestMove.Item2] = (int)Players.O;
-            }
-            while (result != 0 || result != (int)Players.O || result != (int)Players.X);
+                var state = new int[3, 3];
+                int? result;
+                while(true)
+                {
+                    HumanMove(state, Players.X);
+                    Tuple<int, int> bestMove;
+                    result = Min(-10, 10, CopyState(state), out bestMove);
 
-            Console.WriteLine("Result: " + result.Value);
-        }
+                    if (GameCompleted(result, state)) break;
+
+                    state[bestMove.Item1, bestMove.Item2] = (int)Players.O;
+                }
+
+                Console.WriteLine("The winner is: {0}", ((Players)result).ToString());
+            }
+            else
+            {
+                var state = new int[,]
+                {
+                    {(int)Players.N, (int)Players.N, (int)Players.N},
+                    {(int)Players.N, (int)Players.N, (int)Players.N},
+                    {(int)Players.X, (int)Players.N, (int)Players.N}
+                };
+                Tuple<int, int> best;
+                int? result = Min(-10, 10, state, out best);
+                Console.WriteLine("The winner is: {0}", ((Players)result).ToString());
+            }            
+        }        
 
         private static int? Max(int alfa, int beta, int[,] state)
         {
@@ -38,16 +55,16 @@ namespace TicTacToe
                 // do move
                 state[move.Item1, move.Item2] = (int)Players.X;
 
-                Tuple<int, int> bestMove;
+                Tuple<int, int> bestMove = null;
                 var minLimit = Min(alfa, beta, state, out bestMove);
 
                 // alfa = max(alfa, minLimit)
                 if (minLimit.HasValue && alfa < minLimit.Value) alfa = minLimit.Value;
 
-                if (alfa >= beta) break;
-
                 // revert move
                 state[move.Item1, move.Item2] = 0;
+
+                if (alfa > beta) break;                
             }            
 
             return alfa;
@@ -63,6 +80,7 @@ namespace TicTacToe
             }
 
             var moves = Moves(state);
+            var minBeta = 10;
 
             foreach (var move in moves)
             {
@@ -74,14 +92,20 @@ namespace TicTacToe
                 // beta = min(, maxLimit, beta)
                 if (maxLimit.HasValue && maxLimit < beta) beta = maxLimit.Value;
 
-                if (alfa >= beta)
+                // remember the move with the smallest beta
+                if (beta < minBeta || bestMove == null)
                 {
-                    bestMove = Tuple.Create<int, int>(move.Item1, move.Item2);
-                    break;
-                };
+                    bestMove = move;
+                    minBeta = beta;
+                }
 
                 // revert move
                 state[move.Item1, move.Item2] = 0;
+
+                if (alfa > beta)
+                {
+                    break;
+                };                
             }
 
             return beta;
@@ -89,6 +113,7 @@ namespace TicTacToe
 
         private static void HumanMove(int[,] state, Players player)
         {
+            Console.WriteLine();
             for (int r = 0; r < state.GetLength(0); r++)
             {
                 for (int c = 0; c < state.GetLength(0); c++)
@@ -101,7 +126,15 @@ namespace TicTacToe
             Console.WriteLine();
 
             var move = Console.ReadLine().Split(',').Select(x => int.Parse(x)).ToList();
-            state[move[0], move[1]] = (int)player;
+
+            if (state[move[0], move[1]] != (int)Players.N)
+            {
+                Console.WriteLine("Invalid move!");
+                HumanMove(state, player);
+            }
+            {
+                state[move[0], move[1]] = (int)player;
+            }
         }     
 
         private static List<Tuple<int, int>> Moves(int[,] state)
@@ -127,17 +160,25 @@ namespace TicTacToe
         {
             result = 0;
 
-            var length = state.GetLength(0);            
+            var length = state.GetLength(0);
+            var isFinal = true;
+            var haveWinner = true;
+            var winningSymbol = 0;
 
             // check horizontals
             for (int row = 0; row < length; row++)
             {
-                var winningSymbol = state[row, 0];
-                var haveWinner = true;
+                winningSymbol = state[row, 0];
+                haveWinner = true;
                 for (int column = 0; column < length; column++)
                 {
                     // there are empty places
-                    if (state[row, column] == 0) return false;
+                    if (state[row, column] == 0)
+                    {
+                        haveWinner = false;
+                        isFinal = false;
+                        break;
+                    } 
 
                     if (state[row, column] != winningSymbol)
                     {
@@ -149,16 +190,6 @@ namespace TicTacToe
                 if (haveWinner) 
                 {
                     result = (int)winningSymbol;
-                    //for (int r = 0; r < state.GetLength(0); r++)
-                    //{
-                    //    for (int c = 0; c < state.GetLength(0); c++)
-                    //    {
-                    //        Console.Write(state[r, c] + " ");
-                    //    }
-                    //    Console.WriteLine();
-                        
-                    //}
-                    //Console.WriteLine();
                     return true;
                 }
             }
@@ -166,12 +197,17 @@ namespace TicTacToe
             // check vericals
             for (int column = 0; column < length; column++)
             {
-                var winningSymbol = state[0, column];
-                var haveWinner = true;
+                winningSymbol = state[0, column];
+                haveWinner = true;
 
                 for (int row = 0; row < length; row++) {
                     // there are empty places
-                    if (state[row, column] == 0) return false;
+                    if (state[row, column] == 0)
+                    {
+                        haveWinner = false;
+                        isFinal = false;
+                        break;
+                    } 
 
                     if (state[row, column] != winningSymbol)
                     {
@@ -183,21 +219,74 @@ namespace TicTacToe
                 if (haveWinner)
                 {
                     result = (int)winningSymbol;
-                    //for (int r = 0; r < state.GetLength(0); r++)
-                    //{
-                    //    for (int c = 0; c < state.GetLength(0); c++)
-                    //    {
-                    //        Console.Write(state[r, c] + " ");
-                    //    }
-                    //    Console.WriteLine();
-                        
-                    //}
-                    //Console.WriteLine();
                     return true;
                 }
             }
 
-            // draw
+            haveWinner = true;
+            winningSymbol = state[0, 0];
+            for (int i = 0; i < length; i++)
+            {
+                if (state[i, i] != winningSymbol)
+                {
+                    haveWinner = false;
+                    break;
+                }
+
+                if (state[i, i] == 0)
+                {
+                    isFinal = false;
+                    haveWinner = false;
+                    break;
+                }
+            }
+
+            haveWinner = true;
+            winningSymbol = state[0, length - 1];
+            for (int i = 0; i < length; i++)
+            {
+                if (state[i, length - 1 - i] != winningSymbol)
+                {
+                    haveWinner = false;
+                    break;
+                }
+
+                if (state[i, length - 1 - i] == 0)
+                {
+                    isFinal = false;
+                    haveWinner = false;
+                    break;
+                }
+            }
+
+            if (haveWinner)
+            {
+                result = (int)winningSymbol;
+                return true;
+            }
+
+            // draw if true
+            return isFinal;
+        }
+
+        private static bool GameCompleted(int? result, int[,] state)
+        {
+            if (result == (int)Players.O || result == (int)Players.X)
+                return true;
+
+            return result == 0 && IsFilled(state);
+        }
+
+        private static bool IsFilled(int[,] state)
+        {
+            var length = state.GetLength(0);
+            for (int i = 0; i < length; i++)
+            {
+                for (int j = 0; j < length; j++)
+                {
+                    if (state[i, j] == 0) return false;
+                }
+            }
             return true;
         }
 
@@ -219,8 +308,9 @@ namespace TicTacToe
 
         private enum Players
         {
-            X = int.MaxValue,
-            O = int.MinValue
+            X = 10,
+            O = -10,
+            N = 0
         }
     }
 }
