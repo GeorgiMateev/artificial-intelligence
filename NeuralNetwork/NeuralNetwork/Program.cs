@@ -17,9 +17,33 @@ namespace NeuralNetwork
         static void Main(string[] args)
         {
             var trainDataFileName = "iris_train.txt";
+            var data = Program.ReadData(trainDataFileName);
+
+            var hiddenLayerNeurons = 10;
+            var iterations = 10;
+            var learningConst = 0.1;
+            var net = new NeuralNetwork(4, 3, hiddenLayerNeurons);
+            net.Train(data, iterations, learningConst);
+
+            var testFileName = "iris_test.txt";
+            var resultsFileName = "iris_test_result.txt";
+
+            var testCases = Program.ReadData(testFileName);
+            var testResults = Program.ReadData(resultsFileName).Select(x => x.First()).ToList();
+
+            var result = net.ComputeData(testCases);
+
+            for (int i = 0; i < testResults.Count; i++)
+            {
+                Console.WriteLine("Expected: {0} Actual: {1} {2} {3}", testResults[i], result[i][0], result[i][1], result[i][2]);
+            }
+        }
+
+        private static List<IEnumerable<double>> ReadData(string fileName)
+        {            
             var data = new List<IEnumerable<double>>();
 
-            using (var sr = new StreamReader(trainDataFileName))
+            using (var sr = new StreamReader(fileName))
             {
                 string line;
                 while ((line = sr.ReadLine()) != null)
@@ -28,12 +52,7 @@ namespace NeuralNetwork
                     data.Add(dataEntry);
                 }
             }
-
-            var hiddenLayerNeurons = 10;
-            var iterations = 5;
-            var learningConst = 0.1;
-            var net = new NeuralNetwork(4, 3, hiddenLayerNeurons);
-            net.Train(data, iterations, learningConst);
+            return data;
         }
     }
 
@@ -55,7 +74,7 @@ namespace NeuralNetwork
         {
             var attributes = dataEntry.Take(dataEntry.Count() - 1);
             var attrVector = Vector<double>.Build.DenseOfEnumerable(attributes);
-            this.ActivateLayers(attrVector);
+            this.Activate(attrVector);
 
             var expectedClass = (int)dataEntry.Last();
             var expectedOutput = this.ExpectedOutput(expectedClass, this.activations[2].Count);
@@ -81,6 +100,20 @@ namespace NeuralNetwork
         public Vector<double> GetOutput()
         {
             return this.activations.Last();
+        }        
+
+        public IList<double[]> ComputeData(IList<IEnumerable<double>> data)
+        {
+            var results = new List<double[]>();
+            foreach (var item in data)
+            {
+                var vector = Vector<double>.Build.DenseOfEnumerable(item);
+                this.Activate(vector);
+                var result = this.GetOutput();
+                results.Add(result.ToArray());
+            }
+
+            return results;
         }
         #endregion
 
@@ -95,7 +128,7 @@ namespace NeuralNetwork
             this.weights[index] = weights;
         }
 
-        private void ActivateLayers(Vector<double> input)
+        private void Activate(Vector<double> input)
         {
             this.activations[0] = input;
 
