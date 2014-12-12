@@ -19,8 +19,8 @@ namespace NeuralNetwork
             var trainDataFileName = "iris_train.txt";
             var data = Program.ReadData(trainDataFileName);
 
-            var hiddenLayerNeurons = 10;
-            var iterations = 10;
+            var hiddenLayerNeurons = 20;
+            var iterations = 40;
             var learningConst = 0.1;
             var net = new NeuralNetwork(4, 3, hiddenLayerNeurons);
             net.Train(data, iterations, learningConst);
@@ -161,19 +161,14 @@ namespace NeuralNetwork
         {
             var errors = this.weights[1].Transpose() * outputErrors.ToColumnMatrix();
             var vector = errors.EnumerateColumns().First();
-            vector.MapIndexedInplace((i, x) => x * (1 - x) * activations[i]);
+            vector.MapIndexedInplace((i, x) => activations[i] * (1 - activations[i]) * x);
             return vector;
         }
 
         private void UpdateWeights(Matrix<double> weights, Vector<double> activations, Vector<double> errors, double learningConst)
         {
-            var rows = weights.EnumerateRowsIndexed();
-
-            foreach (var row in rows)
-            {
-                var error = errors[row.Item1];
-                row.Item2.MapIndexedInplace((i, x) => x + learningConst * error * activations[i]);
-            }
+            weights.MapIndexedInplace(
+                (r, c, x) => x + learningConst * errors[r] * activations[c]);
         }
         #endregion
 
