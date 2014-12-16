@@ -20,7 +20,7 @@ namespace NeuralNetwork
             var data = Program.ReadData(trainDataFileName);
 
             var hiddenLayerNeurons = 20;
-            var iterations = 40;
+            var iterations = 500;
             var learningConst = 0.1;
             var net = new NeuralNetwork(4, 3, hiddenLayerNeurons);
             net.Train(data, iterations, learningConst);
@@ -35,7 +35,17 @@ namespace NeuralNetwork
 
             for (int i = 0; i < testResults.Count; i++)
             {
-                Console.WriteLine("Expected: {0} Actual: {1} {2} {3}", testResults[i], result[i][0], result[i][1], result[i][2]);
+                double max = -1;
+                int maxIndex = -1;
+                for (int j = 0; j < result[i].Length; j++)
+                {
+                    if (result[i][j] > max)
+                    {
+                        max = result[i][j];
+                        maxIndex = j;
+                    }
+                }
+                Console.WriteLine("Expected: {0} Actual: {1} Output {2}", testResults[i], maxIndex + 1, max);
             }
         }
 
