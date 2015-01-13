@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace DecisionTree
 {
-    class Program
+    public interface ITree
     {
-        static void Main(string[] args)
-        {
-        }
+        ITreeNode Root { get; set; }
     }
-
-    
 }
