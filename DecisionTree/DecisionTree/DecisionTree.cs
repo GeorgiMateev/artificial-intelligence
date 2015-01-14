@@ -12,13 +12,11 @@ namespace DecisionTree
         public DecisionTree(
             IList<IDictionary<string, string>> samples,
             IList<string> attributes,
-            IList<string> classes,
             string classAttributeName,
             int minimumSamplesInTree)
         {
             this.minimumSamplesInTree = minimumSamplesInTree;
             this.attributes = attributes;
-            this.classes = classes;
             this.classAttributeName = classAttributeName;
 
             var attr = this.SelectRootAttribute(attributes, samples);
@@ -28,17 +26,7 @@ namespace DecisionTree
         #endregion
 
         #region ITree implementation
-        public ITreeNode Root
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public ITreeNode Root { get; set; }
         #endregion
 
         #region Private methods
@@ -96,7 +84,7 @@ namespace DecisionTree
                 var groupItems = group.ToList();
 
                 ITreeNode node;
-                if (groupItems.Count > this.minimumSamplesInTree)
+                if (groupItems.Count > this.minimumSamplesInTree && attributes.Count > 0)
                 {
                     var attr = this.SelectRootAttribute(attributes, groupItems);
                     node = new TreeNode(attr, group.Key);
@@ -126,7 +114,6 @@ namespace DecisionTree
 
         #region Private fields and constants
         private string classAttributeName;
-        private IList<string> classes;
         private IList<string> attributes;
         private int minimumSamplesInTree;
         #endregion        

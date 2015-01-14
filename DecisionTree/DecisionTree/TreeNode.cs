@@ -20,7 +20,7 @@ namespace DecisionTree
         {
             this.Attribute = attribute;
             this.ParentValue = parentValue;
-            this.IsLeaf = IsLeaf;
+            this.IsLeaf = isLeaf;
             this.Children = new List<ITreeNode>();
         }
         #endregion
