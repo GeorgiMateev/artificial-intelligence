@@ -20,7 +20,16 @@ namespace DecisionTree
 
             var minimumSamplesInTree = 3;
 
-            var tree = new DecisionTree(data, attributes, className, minimumSamplesInTree);
+            var validator = new CrossValidator(data, 10);
+            var trees = validator.GetMostAccurateTrees(attributes, className, minimumSamplesInTree);
+
+            Console.WriteLine("Percentage of success after cross validation:");
+            for (var i = 0; i < trees.Count; i++)
+            {
+                Console.WriteLine("Tree {0}: {1}%", i, trees[i].Item1);
+            }
+
+            //var tree = new DecisionTree(data, attributes, className, minimumSamplesInTree);
         }
 
         private static IList<IDictionary<string, string>> ReadData(string fileName, IList<string> attributes, string className)

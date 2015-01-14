@@ -29,6 +29,13 @@ namespace DecisionTree
         public ITreeNode Root { get; set; }
         #endregion
 
+        #region Public methods
+        public string Classify(IDictionary<string, string> sample)
+        {
+            return "";
+        }
+        #endregion
+
         #region Private methods
         private double Entropy(IList<IDictionary<string, string>> samples)
         {

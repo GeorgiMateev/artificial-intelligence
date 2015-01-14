@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrossValidator.cs" />
     <Compile Include="DecisionTree.cs" />
     <Compile Include="ITree.cs" />
     <Compile Include="ITreeNode.cs" />
