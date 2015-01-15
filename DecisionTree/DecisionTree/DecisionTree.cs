@@ -21,7 +21,7 @@ namespace DecisionTree
 
             var attr = this.SelectRootAttribute(attributes, samples);
             this.Root = new TreeNode(attr, null);
-            this.ConstructTree(this.Root, this.attributes, samples);
+            this.ConstructTree(this.Root, new List<string>(this.attributes), samples);
         }
         #endregion
 
@@ -32,14 +32,26 @@ namespace DecisionTree
         #region Public methods
         public string Classify(IDictionary<string, string> sample)
         {
-            return "";
+            return this.ClassifyInternal(this.Root, sample);
         }
         #endregion
 
         #region Private methods
+        private string ClassifyInternal(ITreeNode node, IDictionary<string, string> sample)
+        {
+            if (node.IsLeaf)
+            {
+                return node.Attribute;
+            }
+
+            var attrValue = sample[node.Attribute];
+            var nextNode = node.Children.FirstOrDefault(c => c.ParentValue == attrValue);
+            return this.ClassifyInternal(nextNode, sample);
+        }
+
         private double Entropy(IList<IDictionary<string, string>> samples)
         {
-            var samplesCount = samples.Count;
+            double samplesCount = samples.Count;
 
             double entropy = 0;
             var groups = samples.GroupBy(s => s[this.classAttributeName]);
@@ -47,7 +59,7 @@ namespace DecisionTree
             {
                 var probability = group.Count() / samplesCount;
 
-                entropy += probability * Math.Log10(probability);
+                entropy += probability * Math.Log(probability);
             }
 
             return -entropy;
@@ -61,7 +73,7 @@ namespace DecisionTree
             double childrenEntropy = 0;
             foreach (var group in groups)
             {
-                childrenEntropy += this.Entropy(samples);
+                childrenEntropy += (group.Count() / (double)samples.Count) * this.Entropy(group.ToList());
             }
 
             return samplesEntropy - childrenEntropy;
@@ -69,13 +81,13 @@ namespace DecisionTree
 
         private string SelectRootAttribute(IList<string> attributes, IList<IDictionary<string, string>> samples)
         {
-            var attr = attributes.Select(a =>
+            var orderedAttrs = attributes.Select(a =>
                 new Tuple<string, double>(a, this.InformationGain(a, samples)))
-                .OrderByDescending(t => t.Item2)
-                .First()
-                .Item1;
+                .OrderByDescending(t => t.Item2).ToList();
 
-            return attr;
+            return orderedAttrs
+                .First()
+                .Item1;;
         }
 
         private void ConstructTree(ITreeNode root, IList<string> attributes, IList<IDictionary<string, string>> samples)
@@ -84,6 +96,8 @@ namespace DecisionTree
 	        {
 		        return;
 	        }
+
+            attributes.Remove(root.Attribute);
 
             var groups = samples.GroupBy(s => s[root.Attribute]);
             foreach (var group in groups)
@@ -103,9 +117,8 @@ namespace DecisionTree
 	            }
                 root.AddChild(node);
 
-                attributes.Remove(root.Attribute);
-
-                this.ConstructTree(node, attributes, groupItems);
+                var attrsCopy = new List<string>(attributes);
+                this.ConstructTree(node, attrsCopy, groupItems);
             }
         }
 
