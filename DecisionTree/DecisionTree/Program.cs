@@ -18,7 +18,7 @@ namespace DecisionTree
 
             var data = Program.ReadData(trainDataFileName, attributes, className);
 
-            var minimumSamplesInTree = 3;
+            var minimumSamplesInTree = 2;
 
             var validator = new CrossValidator(data, 10);
             var trees = validator.GetMostAccurateTrees(attributes, className, minimumSamplesInTree);

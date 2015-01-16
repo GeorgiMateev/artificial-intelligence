@@ -53,12 +53,12 @@ namespace DecisionTree
 
         private IEnumerable<Tuple<IList<IDictionary<string, string>>, IList<IDictionary<string, string>>>> GetPartitionedDataSets()
         {
-            for (int i = 0; i < this.partitionsCount; i++)
+            for (int i = 0; i < this.partitions.Count; i++)
             {
                 var validationSet = this.partitions[i];
                 var trainingData = new List<IDictionary<string, string>>();
 
-                for (int j = 0; j < this.partitionsCount; j++)
+                for (int j = 0; j < this.partitions.Count; j++)
                 {
                     if (i != j)
                     {
