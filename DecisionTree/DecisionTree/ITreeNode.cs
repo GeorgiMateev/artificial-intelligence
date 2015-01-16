@@ -16,6 +16,8 @@ namespace DecisionTree
 
         bool IsLeaf { get; set; }
 
+        double Probability { get; set; }
+
         void AddChild(ITreeNode child);
     }
 }

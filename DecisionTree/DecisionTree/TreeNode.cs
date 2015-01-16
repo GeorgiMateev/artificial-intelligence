@@ -8,6 +8,10 @@ namespace DecisionTree
 {
     public class TreeNode : ITreeNode
     {
+        private string attr;
+        private string p;
+        private double probability;
+
         #region Construction
         public TreeNode(string attribute, string parentValue)
         {
@@ -16,12 +20,21 @@ namespace DecisionTree
             this.Children = new List<ITreeNode>();
         }
 
-        public TreeNode(string attribute, string parentValue, bool isLeaf)
+        public TreeNode(string attribute, string parentValue, bool isLeaf, double probability)
         {
             this.Attribute = attribute;
             this.ParentValue = parentValue;
             this.IsLeaf = isLeaf;
             this.Children = new List<ITreeNode>();
+            this.Probability = probability;
+        }
+
+        public TreeNode(string attribute, string parentValue, double probability)
+        {
+            this.Attribute = attribute;
+            this.ParentValue = parentValue;
+            this.Children = new List<ITreeNode>();
+            this.Probability = probability;
         }
         #endregion
 
@@ -33,6 +46,8 @@ namespace DecisionTree
         public string ParentValue { get; set; }
 
         public bool IsLeaf { get; set; }
+
+        public double Probability { get; set; }
 
         public void AddChild(ITreeNode child)
         {

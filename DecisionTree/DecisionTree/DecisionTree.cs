@@ -45,7 +45,14 @@ namespace DecisionTree
             }
 
             var attrValue = sample[node.Attribute];
+
             var nextNode = node.Children.FirstOrDefault(c => c.ParentValue == attrValue);
+
+            if (attrValue == "?" || nextNode == null)
+	        {
+		        nextNode = node.Children.OrderBy(c => c.Probability).First();
+	        }
+
             return this.ClassifyInternal(nextNode, sample);
         }
 
@@ -102,18 +109,25 @@ namespace DecisionTree
             var groups = samples.GroupBy(s => s[root.Attribute]);
             foreach (var group in groups)
             {
+                if (group.Key == "?")
+                {
+                    continue;
+                }
+
                 var groupItems = group.ToList();
 
                 ITreeNode node;
-                if (groupItems.Count > this.minimumSamplesInTree && attributes.Count > 0)
+                if (groupItems.Count > this.minimumSamplesInTree && attributes.Count > 0 && !this.HasOneClass(groupItems))
                 {
                     var attr = this.SelectRootAttribute(attributes, groupItems);
-                    node = new TreeNode(attr, group.Key);
+                    var probability = groupItems.Count / (double)samples.Count;
+                    node = new TreeNode(attr, group.Key, probability);
                 }
                 else
 	            {
                     var samplesClass = this.DetermineClass(groupItems);
-                    node = new TreeNode(samplesClass, group.Key, true);                    
+                    var probability = groupItems.Count / (double)samples.Count;
+                    node = new TreeNode(samplesClass, group.Key, true, probability);                    
 	            }
                 root.AddChild(node);
 
@@ -129,6 +143,11 @@ namespace DecisionTree
                 .OrderByDescending(g => g.Key)
                 .First()
                 .Key;
+        }
+
+        private bool HasOneClass(List<IDictionary<string, string>> samples)
+        {
+            return samples.GroupBy(s => s[this.classAttributeName]).Count() == 1;
         }
         #endregion
 

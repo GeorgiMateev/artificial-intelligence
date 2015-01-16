@@ -18,9 +18,9 @@ namespace DecisionTree
 
             var data = Program.ReadData(trainDataFileName, attributes, className);
 
-            var minimumSamplesInTree = 10;
+            var minimumSamplesInTree = 5;
 
-            var validator = new CrossValidator(data, data.Count);
+            var validator = new CrossValidator(data, 10);
             var trees = validator.GetMostAccurateTrees(attributes, className, minimumSamplesInTree);
 
             Console.WriteLine("Percentage of success after cross validation:");
