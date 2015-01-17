@@ -9,9 +9,10 @@ namespace Clusterization
     public class KMeans
     {
         #region Public methods
-        public void Clusterize(IList<Tuple<double, double, int>>data, int clusters)
+        public void Clusterize(IList<Tuple<double, double, int>>data, int clusters, out IList<Tuple<double,double>> initialMeans, out IList<Tuple<double,double>> centroids)
         {
-            var centroids = this.ChooseInitialMeans(data, clusters);
+            centroids = this.ChooseInitialMeans(data, clusters);
+            initialMeans = new List<Tuple<double, double>>(centroids);
 
             var assigned = true;
             while (assigned)
@@ -29,7 +30,7 @@ namespace Clusterization
             var means = new List<Tuple<double, double>>();
             for (int i = 0; i < clusters; i++)
             {
-                var sample = data[KMeans.random.Next(clusters)];
+                var sample = data[KMeans.random.Next(data.Count)];
                 var mean = new Tuple<double, double>(sample.Item1, sample.Item2);
                 means.Add(mean);
             }

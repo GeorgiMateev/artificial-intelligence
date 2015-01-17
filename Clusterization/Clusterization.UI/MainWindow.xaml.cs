@@ -60,18 +60,20 @@ namespace Clusterization.UI
 
             var data = ReadData(file);
 
-            this.kmeans.Clusterize(data, c);
+            IList<Tuple<double, double>> initialMeans;
+            IList<Tuple<double, double>> centroids;
+            this.kmeans.Clusterize(data, c, out initialMeans, out centroids);
 
-            this.DrawPoints(data, c);
+            this.DrawPoints(data, c, initialMeans, centroids);
         }
 
-        private void DrawPoints(IList<Tuple<double, double, int>> points, int clusters)
+        private void DrawPoints(IList<Tuple<double, double, int>> points, int clusters, IList<Tuple<double, double>> initialMeans, IList<Tuple<double, double>> centroids)
         {
             var brushes = this.GetBrushes(clusters);
             var cX = int.Parse(centerX.Text);
             var cY = int.Parse(centerY.Text);
             var center = new Tuple<int, int>(cX, cY);
-            var scale = int.Parse(scaleBox.Text);
+            var scale = int.Parse(scaleBox.Text);            
 
             foreach (var point in points)
             {
@@ -86,7 +88,34 @@ namespace Clusterization.UI
 
                 canvas.Children.Add(circle);
             }
+
+            //DrawInitialMeans(initialMeans, brushes, center, scale);
             
+        }
+
+        private void DrawInitialMeans(IList<Tuple<double, double>> initialMeans, Brush[] brushes, Tuple<int, int> center, int scale)
+        {
+            for (int i = 0; i < initialMeans.Count; i++)
+            {
+                var mean = initialMeans[i];
+
+                var x = -center.Item1 + mean.Item1 * scale;
+                var y = -center.Item2 + mean.Item2 * scale;
+                
+                var meanFigure = new Polygon
+                {
+                    Points = new PointCollection()
+                    {
+                        new Point(x - 5, y - 5),
+                        new Point(x + 5, y - 5),
+                        new Point(x, y + 5)
+                    },
+                    Fill = brushes[i]
+                };
+                //meanFigure.Margin = new Thickness(x, y, 0, 0);
+
+                canvas.Children.Add(meanFigure);
+            }
         }
 
         private Brush[] GetBrushes(int number)
