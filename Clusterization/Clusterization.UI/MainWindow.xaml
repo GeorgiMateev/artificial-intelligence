@@ -1,0 +1,15 @@
+﻿<Window x:Class="Clusterization.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Label>File</Label>
+        <ComboBox x:Name="fileName"></ComboBox>
+        
+        <Label>Clusters</Label>
+        <TextBox x:Name="clusters"></TextBox>
+        
+        <Button x:Name="clusterize">Clusterize</Button>
+        
+    </Grid>
+</Window>
