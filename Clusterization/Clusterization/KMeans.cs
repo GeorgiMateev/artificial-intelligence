@@ -39,15 +39,22 @@ namespace Clusterization
         private bool AssignClusters(IList<Tuple<double, double, int>> data, IList<Tuple<double, double>> centroids)
         {
             var assigned = false;
-            foreach (var sample in data)
+            for (var i = 0; i < data.Count; i++)
             {
-                assigned = assigned || this.AssignCluster(sample, centroids);
+                var sample = data[i];
+                var cluster = this.AssignCluster(sample, centroids);
+                if (cluster != 0)
+	            {
+		            var newSample = new Tuple<double, double, int>(sample.Item1, sample.Item2, cluster);
+                    data[i] = newSample;
+                    assigned = true;
+	            }               
             }
 
             return assigned;
         }  
 
-        private bool AssignCluster(Tuple<double, double, int> sample, IList<Tuple<double, double>> centroids)
+        private int AssignCluster(Tuple<double, double, int> sample, IList<Tuple<double, double>> centroids)
         {
             double minDistance = int.MaxValue;
             var cluster = 0;
@@ -59,17 +66,16 @@ namespace Clusterization
                 if (distance < minDistance)
                 {
                     minDistance = distance;
-                    cluster = i;
+                    cluster = i + 1;
                 }
             }
 
             if(sample.Item3 != cluster)
             {
-                sample = new Tuple<double, double, int>(sample.Item1, sample.Item2, cluster);
-                return true;
+                return cluster;
             }
 
-            return false;
+            return 0;
         }
 
         private void UpdateCentroids(IList<Tuple<double, double, int>> data, IList<Tuple<double, double>> centroids)
@@ -105,7 +111,7 @@ namespace Clusterization
         #endregion
 
         #region Private fields and constants
-        private static Random random = new Random(120);
+        private static Random random = new Random();
         #endregion
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,6 +38,14 @@ namespace Clusterization.UI
             };
 
             fileName.ItemsSource = files;
+
+            fileName.SelectedValue = files[0];
+            scaleBox.Text = "10";
+            clusters.Text = "3";
+
+            centerX.Text = "50";
+            centerY.Text = "50";
+
             clusterize.Click +=clusterize_Click;
 
             this.kmeans = new KMeans();
@@ -44,6 +53,8 @@ namespace Clusterization.UI
 
         void clusterize_Click(object sender, RoutedEventArgs e)
         {
+            canvas.Children.Clear();
+
  	        var file = fileName.SelectedValue.ToString();
             var c = int.Parse(clusters.Text);
 
@@ -56,8 +67,63 @@ namespace Clusterization.UI
 
         private void DrawPoints(IList<Tuple<double, double, int>> points, int clusters)
         {
+            var brushes = this.GetBrushes(clusters);
+            var cX = int.Parse(centerX.Text);
+            var cY = int.Parse(centerY.Text);
+            var center = new Tuple<int, int>(cX, cY);
+            var scale = int.Parse(scaleBox.Text);
+
+            foreach (var point in points)
+            {
+                var circle = new Ellipse
+                {
+                    Width = 7,
+                    Height = 7,
+                    Fill = brushes[point.Item3 - 1]
+                };
+                circle.Margin = new Thickness(-center.Item1 + point.Item1 * scale,
+                -center.Item2 + point.Item2 * scale, 0, 0);
+
+                canvas.Children.Add(circle);
+            }
             
         }
+
+        private Brush[] GetBrushes(int number)
+        {
+            var brushes = new Brush[number];
+
+            var brushesCollection = new List<Brush>()
+            {
+                Brushes.Black,
+                Brushes.Red,
+                Brushes.Blue,
+                Brushes.Green,
+                Brushes.Orange,
+                Brushes.Brown,
+                Brushes.Purple,
+                Brushes.Yellow,
+                Brushes.Pink,
+                Brushes.Gray
+            };
+
+            for (int i = 0; i < number; i++)
+            {
+                brushes[i] = PickRandomBrush(brushesCollection);
+            }
+
+            return brushes;
+        }
+
+        private Brush PickRandomBrush(List<Brush> brushes)
+        {
+            Brush result = Brushes.Transparent;
+
+            int index = this.random.Next(brushes.Count);
+            result = brushes[index];
+            brushes.RemoveAt(index);            
+            return result;
+        } 
 
         private static List<Tuple<double, double, int>> ReadData(string fileName)
         {
@@ -75,12 +141,13 @@ namespace Clusterization.UI
 
                     var dataEntry = line.Split(',');
 
-                    data.Add(new Tuple<double, double, int>(double.Parse(dataEntry[0]), double.Parse(dataEntry[1]), 0));
+                    data.Add(new Tuple<double, double, int>(double.Parse(dataEntry[0], CultureInfo.InvariantCulture), double.Parse(dataEntry[1], CultureInfo.InvariantCulture), 0));
                 }
             }
             return data;
         }
 
         private KMeans kmeans;
+        private Random random = new Random();
     }
 }
