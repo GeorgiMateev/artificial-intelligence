@@ -37,20 +37,72 @@ namespace Clusterization.UI
                 "test121212.arff"
             };
 
-            fileName.ItemsSource = files;
+            fileName.ItemsSource = files;            
 
             fileName.SelectedValue = files[0];
-            scaleBox.Text = "10";
-            clusters.Text = "3";
+            scaleBox.Text = "7";
+            clusters.Text = "2";
 
-            centerX.Text = "50";
-            centerY.Text = "50";
+            centerX.Text = "0";
+            centerY.Text = "0";
 
             runs.Text = "10";
+
+            fileName.SelectionChanged += fileName_SelectionChanged;
 
             clusterize.Click +=clusterize_Click;
 
             this.kmeans = new KMeans();
+        }
+
+        void fileName_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (this.fileName.SelectedValue.ToString())
+            {
+                case "easy_12.arff":
+                    {
+                        scaleBox.Text = "7";
+                        clusters.Text = "2";
+                        centerX.Text = "0";
+                        centerY.Text = "0";
+                    }
+                    break;
+                case "synth1.arff":
+                case "synth2.arff":
+                    {
+                        scaleBox.Text = "200";
+                        clusters.Text = "3";
+                        centerX.Text = "-500";
+                        centerY.Text = "-100";
+                    }
+                    break;
+                case "test2in1.arff":
+                    {
+                        scaleBox.Text = "5";
+                        clusters.Text = "2";
+                        centerX.Text = "-200";
+                        centerY.Text = "0";
+                    }
+                    break;
+                case "test121.arff":
+                    {
+                        scaleBox.Text = "10";
+                        clusters.Text = "3";
+                        centerX.Text = "0";
+                        centerY.Text = "0";
+                    }
+                    break;
+                case "test121212.arff":
+                    {
+                        scaleBox.Text = "7";
+                        clusters.Text = "6";
+                        centerX.Text = "0";
+                        centerY.Text = "0";
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         void clusterize_Click(object sender, RoutedEventArgs e)
