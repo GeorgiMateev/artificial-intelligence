@@ -46,6 +46,8 @@ namespace Clusterization.UI
             centerX.Text = "50";
             centerY.Text = "50";
 
+            runs.Text = "10";
+
             clusterize.Click +=clusterize_Click;
 
             this.kmeans = new KMeans();
@@ -60,11 +62,13 @@ namespace Clusterization.UI
 
             var data = ReadData(file);
 
+            var r = int.Parse(runs.Text);
+
             IList<Tuple<double, double>> initialMeans;
             IList<Tuple<double, double>> centroids;
-            this.kmeans.Clusterize(data, c, out initialMeans, out centroids);
+            var classifiedData = this.kmeans.Clusterize(data, c, r, out initialMeans, out centroids);
 
-            this.DrawPoints(data, c, initialMeans, centroids);
+            this.DrawPoints(classifiedData, c, initialMeans, centroids);
         }
 
         private void DrawPoints(IList<Tuple<double, double, int>> points, int clusters, IList<Tuple<double, double>> initialMeans, IList<Tuple<double, double>> centroids)

@@ -9,7 +9,35 @@ namespace Clusterization
     public class KMeans
     {
         #region Public methods
-        public void Clusterize(IList<Tuple<double, double, int>>data, int clusters, out IList<Tuple<double,double>> initialMeans, out IList<Tuple<double,double>> centroids)
+        public IList<Tuple<double, double, int>> Clusterize(IList<Tuple<double, double, int>>data, int clusters, int runs, out IList<Tuple<double,double>> initialMeans, out IList<Tuple<double,double>> centroids)
+        {
+            double minInnerDistance = double.MaxValue;
+            IList<Tuple<double, double, int>> bestRunData = null;
+            initialMeans = null;
+            centroids = null;
+
+            for (int i = 0; i < runs; i++)
+            {
+                IList<Tuple<double, double>> tempInitialMeans;
+                IList<Tuple<double, double>> tempCentroids;
+
+                this.ClusterizeInternal(data, clusters, out tempInitialMeans, out tempCentroids);
+
+                var innerDistance = this.CalculateInnerDistance(data, tempCentroids);
+                if (innerDistance < minInnerDistance)
+                {
+                    minInnerDistance = innerDistance;
+                    bestRunData = new List<Tuple<double, double, int>>(data);
+                    initialMeans = new List<Tuple<double, double>>(tempInitialMeans);
+                    centroids = new List<Tuple<double, double>>(tempCentroids); 
+                }
+            }
+            return bestRunData;
+        }                            
+        #endregion
+
+        #region Private methods
+        private void ClusterizeInternal(IList<Tuple<double, double, int>> data, int clusters, out IList<Tuple<double, double>> initialMeans, out IList<Tuple<double, double>> centroids)
         {
             centroids = this.ChooseInitialMeans(data, clusters);
             initialMeans = new List<Tuple<double, double>>(centroids);
@@ -21,10 +49,8 @@ namespace Clusterization
 
                 this.UpdateCentroids(data, centroids);
             }
-        }                  
-        #endregion
+        }
 
-        #region Private methods
         private IList<Tuple<double, double>> ChooseInitialMeans(IList<Tuple<double, double, int>> data, int clusters)
         {
             var means = new List<Tuple<double, double>>();
@@ -109,6 +135,18 @@ namespace Clusterization
 
             return centroid;
         }
+
+        private double CalculateInnerDistance(IList<Tuple<double, double, int>> data, IList<Tuple<double, double>> centroids)
+        {
+            double distanceSum = 0;
+            foreach (var sample in data)
+            {
+                var cluster = sample.Item3 -1;
+                var distance = this.Distance(sample, centroids[cluster]);
+                distanceSum += distance;
+            }
+            return distanceSum;
+        } 
         #endregion
 
         #region Private fields and constants

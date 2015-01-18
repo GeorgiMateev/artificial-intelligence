@@ -12,7 +12,8 @@
             <ColumnDefinition Width="165"/>
             <ColumnDefinition Width="87"/>
             <ColumnDefinition Width="83"/>
-            <ColumnDefinition Width="291"/>
+            <ColumnDefinition Width="182"/>
+            <ColumnDefinition Width="109"/>
             <ColumnDefinition Width="170"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
@@ -25,15 +26,18 @@
         <Label Margin="10" Grid.Column="2">Scale</Label>
         <TextBox x:Name="scaleBox" Margin="10,8,10,10" Grid.Column="2" Grid.Row="1" />
 
-        <Label Margin="10,9,219,11" Grid.Column="3">Center X</Label>
-        <TextBox x:Name="centerX" Margin="10,8,219,10" Grid.Column="3" Grid.Row="1" />
+        <Label Margin="10,9,110,11" Grid.Column="3">Center X</Label>
+        <TextBox x:Name="centerX" Margin="10,8,110,10" Grid.Column="3" Grid.Row="1" />
 
-        <Label Margin="99,10,130,10" Grid.Column="3">Center Y</Label>
-        <TextBox x:Name="centerY" Margin="99,7,130,11" Grid.Column="3" Grid.Row="1" />
+        <Label Margin="99,10,21,10" Grid.Column="3">Center Y</Label>
+        <TextBox x:Name="centerY" Margin="99,7,21,11" Grid.Column="3" Grid.Row="1" />
 
-        <Button x:Name="clusterize" Margin="10,7,21,13" Grid.Column="4" Grid.Row="1">Clusterize</Button>
+        <Label Margin="10,10,37,10" Grid.Column="4">Runs</Label>
+        <TextBox x:Name="runs" Margin="10,7,37,11" Grid.Column="4" Grid.Row="1" />
 
-        <Canvas x:Name="canvas" Margin="10" Grid.ColumnSpan="6" Grid.Row="2"></Canvas>
+        <Button x:Name="clusterize" Margin="10,7,21,13" Grid.Column="5" Grid.Row="1">Clusterize</Button>
+
+        <Canvas x:Name="canvas" Margin="10" Grid.ColumnSpan="7" Grid.Row="2"></Canvas>
 
     </Grid>
 </Window>
